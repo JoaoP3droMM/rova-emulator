@@ -1,0 +1,45 @@
+# RetroArch: empacota a versão de retroarch/versions.json a cada push e publica numa tag retroarch-v*.
+name: RetroArch
+
+on:
+  push:
+    branches: [main]
+    tags: ['retroarch-v*']
+    paths: ['retroarch/**', '.github/workflows/retroarch.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ferramentas
+        run: sudo apt-get update && sudo apt-get install -y p7zip-full jq zip
+      - name: Empacotar (hash conferido)
+        run: retroarch/package.sh "" out
+      - name: Conferir a versão da tag
+        if: startsWith(github.ref, 'refs/tags/retroarch-v')
+        run: test "retroarch-v$(cat out/retroarch-version.txt)" = "${GITHUB_REF_NAME}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rova-emulator-retroarch
+          path: out/rova-emulator-retroarch-*
+          if-no-files-found: error
+          retention-days: 7
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/retroarch-v')
+    needs: package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: rova-emulator-retroarch
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: rova-emulator-retroarch-*

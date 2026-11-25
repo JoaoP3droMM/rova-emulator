@@ -1,0 +1,10 @@
+{
+  "current": "1.22.2",
+  "source": "https://buildbot.libretro.com/stable/{version}/{asset}",
+  "versions": {
+    "1.22.2": {
+      "linux/x86_64/RetroArch.7z": "7d62da9a21397d6e1b9490785cedbeafd262781b50115076736fbe8a77ef30e9",
+      "windows/x86_64/RetroArch.7z": "b2139b1d0f9d4526dc6b5ce23cbb3efdc766096fa6f2c3df016818b486ac6372"
+    }
+  }
+}
