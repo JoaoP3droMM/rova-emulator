@@ -1,0 +1,43 @@
+# Switch (Ryubing): empacota a versão de switch/versions.json a cada push e publica numa tag switch-v*.
+name: Switch
+
+on:
+  push:
+    branches: [main]
+    tags: ['switch-v*']
+    paths: ['switch/**', '.github/workflows/switch.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Empacotar (hash conferido)
+        run: switch/package.sh "" out
+      - name: Conferir a versão da tag
+        if: startsWith(github.ref, 'refs/tags/switch-v')
+        run: test "switch-v$(cat out/version.txt)" = "${GITHUB_REF_NAME}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rova-emulator-switch
+          path: out/rova-emulator-switch-*
+          if-no-files-found: error
+          retention-days: 7
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/switch-v')
+    needs: package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: rova-emulator-switch
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: rova-emulator-switch-*
