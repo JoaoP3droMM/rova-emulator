@@ -10,6 +10,8 @@ out="${2:-$PWD/out}"
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
 mkdir -p "$out"
+# Caminho completo: o zip roda de dentro de outra pasta.
+out="$(cd "$out" && pwd)"
 
 fetch() {
   local asset="$1"
